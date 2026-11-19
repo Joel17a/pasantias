@@ -1,0 +1,47 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pasantias_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - DB_HOST=db
+      - DB_NAME=pasantias_tienda
+      - DB_USER=root
+      - DB_PASS=
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - red-tienda
+
+  db:
+    image: mysql:8.4
+    container_name: pasantias_mysql
+    restart: always
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_DATABASE: pasantias_tienda
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - red-tienda
+
+volumes:
+  mysql_data:
+
+networks:
+  red-tienda:
+    driver: bridge
