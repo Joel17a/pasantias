@@ -1,0 +1,27 @@
+name: CI Pipeline - Unit Tests & Docker Build
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo, pdo_mysql
+
+      - name: Run unit tests
+        run: php modulo-08-testing-cicd/tests/Unit/ServiciosTest.php
+
+      - name: Build Docker image
+        run: docker build -t pasantias-api-ci ./modulo-06-docker
